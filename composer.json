@@ -1,0 +1,37 @@
+{
+    "name": "digital-creative/resource-navigation-tab",
+    "description": "Organize your long pile of tables and relationships into structured pages.",
+    "keywords": [
+        "laravel",
+        "nova",
+        "tabs",
+        "card",
+        "field"
+    ],
+    "authors": [
+        {
+            "name": "Rafael Milewski"
+        }
+    ],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "DigitalCreative\\ResourceNavigationTab\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DigitalCreative\\ResourceNavigationTab\\ResourceNavigationTabServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
