@@ -6,7 +6,7 @@
 
 Organize your long pile of tables and relationships into structured pages.
 
-![PillFilter in Action](https://raw.githubusercontent.com/dcasia/resource-navigation-tab/master/screenshots/demo-1.png)
+![Resource Navigation Tab in Action](https://raw.githubusercontent.com/dcasia/resource-navigation-tab/master/screenshots/demo-1.png)
 
 # Installation
 
@@ -32,19 +32,23 @@ class ExampleNovaResource extends Resource {
     public function fields(Request $request)
     {
         return [
-            ResourceNavigationTab::make('Profile', [
+            ResourceNavigationTab::make('Information', [
                 Text::make('Name'),
                 Text::make('Age'),
                 HasMany::make('Hobbies')
             ])
             ResourceNavigationTab::make('Activities', [...]),
-            ResourceNavigationTab::make('Preferences', [...]),
-            ResourceNavigationTab::make('Purchased Products', [...]),
+            ResourceNavigationTab::make('Social Interactions', [...]),
+            ResourceNavigationTab::make('Settings', [...]),
         ];
     }
 
 }
 ```
+
+Once setup navigate to your resource detail view, and you should be presented with this card:
+
+![Resource Navigation Tab in Action](https://raw.githubusercontent.com/dcasia/resource-navigation-tab/master/screenshots/demo-2.png)
 
 By default the main resource table (the one with the edit/delete buttons) will have the same title as your tabs,
 however you can customize it by calling `->resourceTableTitle('Another title')`
