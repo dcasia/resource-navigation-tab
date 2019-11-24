@@ -18,8 +18,8 @@ composer require digital-creative/resource-navigation-tab
 
 ## Basic Usage
 
-Firstly import `HasResourceNavigationTabTrait` trait into your resource 
-and start grouping your fields with `ResourceNavigationTab` object:
+First, import `HasResourceNavigationTabTrait` trait into your resource 
+and start grouping your fields with the `ResourceNavigationTab` object:
 
 ```php
 use DigitalCreative\NavigationCard\HasResourceNavigationTabTrait;
@@ -48,7 +48,7 @@ class ExampleNovaResource extends Resource {
 
 Once setup navigate to your resource detail view, and you should be presented with this card:
 
-![Resource Navigation Tab in Action](https://raw.githubusercontent.com/dcasia/resource-navigation-tab/master/screenshots/demo-2.png)
+![Resource Navigation Tab in Action](https://raw.githubusercontent.com/dcasia/resource-navigation-tab/master/screenshots/demo-3.png)
 
 By default the main resource table (the one with the edit/delete buttons) will have the same title as your tabs,
 however you can customize it by calling `->resourceTableTitle('Another title')`
