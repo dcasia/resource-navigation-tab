@@ -22,8 +22,8 @@ First, import `HasResourceNavigationTabTrait` trait into your resource
 and start grouping your fields with the `ResourceNavigationTab` object:
 
 ```php
-use DigitalCreative\NavigationCard\HasResourceNavigationTabTrait;
-use DigitalCreative\NavigationCard\ResourceNavigationTab;
+use DigitalCreative\ResourceNavigationTab\HasResourceNavigationTabTrait;
+use DigitalCreative\ResourceNavigationTab\ResourceNavigationTab;
 
 class ExampleNovaResource extends Resource {
  
@@ -66,8 +66,8 @@ Every defined card will be shown on every tab by default,
 however you can choose which card you want to show when a specific tab is selected:
 
 ```php
-use DigitalCreative\NavigationCard\HasResourceNavigationTabTrait;
-use DigitalCreative\NavigationCard\ResourceNavigationTab;
+use DigitalCreative\ResourceNavigationTab\HasResourceNavigationTabTrait;
+use DigitalCreative\ResourceNavigationTab\ResourceNavigationTab;
 
 class ExampleNovaResource extends Resource {
  
