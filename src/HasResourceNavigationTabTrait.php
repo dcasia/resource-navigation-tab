@@ -232,11 +232,7 @@ trait HasResourceNavigationTabTrait
             return $field->authorizedToSee($request);
         });
 
-        $firstTab = $fields->whereInstanceOf(ResourceNavigationTab::class)->first();
-
-        $controller = $request->route()->controller;
-
-        if (!($controller instanceof ResourceShowController)) {
+        if (!($request->route()->controller instanceof ResourceShowController)) {
 
             $fields->each(static function ($field) {
 
@@ -252,6 +248,13 @@ trait HasResourceNavigationTabTrait
 
         }
 
+        $instances = $fields->whereInstanceOf(ResourceNavigationTab::class);
+        $firstTab = $instances->first();
+
+        $match = $instances->first(static function (ResourceNavigationTab $resourceNavigationTab) use ($activeTab) {
+            return $resourceNavigationTab->isActive($activeTab);
+        });
+
         /**
          * Remove all the nonActive NavigationField from the fields list
          */
@@ -259,7 +262,7 @@ trait HasResourceNavigationTabTrait
 
             if ($field instanceof ResourceNavigationTab) {
 
-                if (($activeTab === null && $field === $firstTab) || $field->isActive($activeTab)) {
+                if (($match === null && $field === $firstTab) || $match === $field) {
 
                     $fields->put($index, $field->data);
 
