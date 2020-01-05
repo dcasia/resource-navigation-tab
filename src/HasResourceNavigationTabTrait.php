@@ -2,11 +2,14 @@
 
 namespace DigitalCreative\ResourceNavigationTab;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Laravel\Nova\Card;
 use Laravel\Nova\Fields\FieldCollection;
 use Laravel\Nova\Http\Controllers\ResourceShowController;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
+use Throwable;
 
 trait HasResourceNavigationTabTrait
 {
@@ -15,6 +18,8 @@ trait HasResourceNavigationTabTrait
      * Resolve the detail fields and assign them to their associated panel.
      *
      * @param NovaRequest $request
+     *
+     * @throws Throwable
      * @return FieldCollection
      */
     public function detailFieldsWithinPanels(NovaRequest $request)
@@ -26,12 +31,18 @@ trait HasResourceNavigationTabTrait
         );
     }
 
+    /**
+     * @param $label
+     * @param NovaRequest $request
+     *
+     * @return mixed
+     */
     protected function panelsWithDefaultLabel($label, NovaRequest $request)
     {
         return with(
             collect(array_values($this->resolveActiveFields($request)))->whereInstanceOf(Panel::class)->values(),
-            function ($panels) use ($label) {
-                return $panels->when($panels->where('name', $label)->isEmpty(), function ($panels) use ($label) {
+            static function ($panels) use ($label) {
+                return $panels->when($panels->where('name', $label)->isEmpty(), static function ($panels) use ($label) {
                     return $panels->prepend((new Panel($label))->withToolbar());
                 })->all();
             }
@@ -59,6 +70,8 @@ trait HasResourceNavigationTabTrait
      * Get the cards for the given request.
      *
      * @param NovaRequest $request
+     *
+     * @throws Throwable
      * @return Collection
      */
     public function resolveCards(NovaRequest $request)
@@ -70,7 +83,10 @@ trait HasResourceNavigationTabTrait
 
         $resources = collect($this->fields($request))
             ->whereInstanceOf(ResourceNavigationTab::class)
-            ->each(function (ResourceNavigationTab $field) use ($cardsToRemove, $cards) {
+            ->filter(static function (ResourceNavigationTab $field) use ($request) {
+                return $field->authorizedToSee($request);
+            })
+            ->each(static function (ResourceNavigationTab $field) use ($cardsToRemove, $cards) {
 
                 /**
                  * Avoids the cards flashing when switching tabs
@@ -79,14 +95,18 @@ trait HasResourceNavigationTabTrait
 
                     $cardsToRemove->put(
                         $field->id,
-                        collect($field->cardsToRemove)->map(function ($card) use ($cards) {
-                            return $cards->whereInstanceOf($card)->map->component();
+                        collect($field->cardsToRemove)->map(static function ($card) use ($cards) {
+                            return $cards->whereInstanceOf($card)->map(static function ($card) {
+                                return get_class($card);
+                            });
                         })->flatten()
                     );
 
                 } else {
 
-                    $cardsToRemove->put($field->id, $cards->map->component());
+                    $cardsToRemove->put($field->id, $cards->map(static function ($card) {
+                        return get_class($card);
+                    }));
 
                 }
 
@@ -94,13 +114,13 @@ trait HasResourceNavigationTabTrait
             ->mapInto(Resource::class)
             ->values();
 
-        if ($activeNavigationField) {
+        /**
+         * Remove all unnecessary cards
+         */
 
-            foreach ($activeNavigationField->cardsToRemove as $card) {
+        foreach ($this->getCardsToRemove($request, $activeNavigationField) as $card) {
 
-                $cards->forget($cards->whereInstanceOf($card)->keys()->toArray());
-
-            }
+            $cards->forget($cards->whereInstanceOf($card)->keys()->toArray());
 
         }
 
@@ -114,28 +134,78 @@ trait HasResourceNavigationTabTrait
          */
         $cards->prepend($navigationCard);
 
-        return collect(array_values($this->filter($cards->toArray())));
+        return collect(array_values($this->filter($cards->toArray())))->each(static function (Card $card) {
+
+            if (!$card instanceof ResourceNavigationCard) {
+
+                $card->withMeta([ 'navigationTabClass' => get_class($card) ]);
+
+            }
+
+        });
 
     }
 
+    /**
+     * @param Request $request
+     * @param ResourceNavigationTab $resourceNavigationTab
+     *
+     * @return array
+     */
+    private function getCardsToRemove(Request $request, ResourceNavigationTab $resourceNavigationTab): array
+    {
+
+        if (!blank($resourceNavigationTab->cardsToRemove)) {
+
+            return $resourceNavigationTab->cardsToRemove;
+
+        }
+
+        if (!$resourceNavigationTab->withCards) {
+
+            return $this->cards($request);
+
+        }
+
+        return [];
+
+    }
+
+    /**
+     * @param NovaRequest $request
+     *
+     * @return FieldCollection
+     */
     public function availableFields(NovaRequest $request)
     {
         return new FieldCollection(array_values($this->filter($this->resolveActiveFields($request))));
     }
 
+    /**
+     * @param NovaRequest $request
+     *
+     * @return string|null
+     */
     private function getActiveTab(NovaRequest $request): ?string
     {
-        parse_str(parse_url($request->server('HTTP_REFERER'), PHP_URL_QUERY), $query);
-
-        return $query[ 'tab' ] ?? null;
+        return $request->query('navigationTab');
     }
 
+    /**
+     * @param NovaRequest $request
+     *
+     * @throws Throwable
+     * @return ResourceNavigationTab
+     */
     private function getActiveNavigationField(NovaRequest $request): ResourceNavigationTab
     {
 
         $fields = collect($this->fields($request));
         $activeTab = $this->getActiveTab($request);
-        $navigationFields = $fields->whereInstanceOf(ResourceNavigationTab::class);
+        $navigationFields = $fields->whereInstanceOf(ResourceNavigationTab::class)
+                                   ->filter(static function (ResourceNavigationTab $field) use ($request) {
+                                       return $field->authorizedToSee($request);
+                                   });
 
         throw_if($navigationFields->isEmpty(), 'You should include at least 1 NavigationField in your fields array');
 
@@ -149,18 +219,26 @@ trait HasResourceNavigationTabTrait
 
     }
 
+    /**
+     * @param NovaRequest $request
+     *
+     * @return array
+     */
     private function resolveActiveFields(NovaRequest $request): array
     {
 
         $activeTab = $this->getActiveTab($request);
-        $fields = collect($this->fields($request));
+        $fields = collect($this->fields($request))->filter(static function (ResourceNavigationTab $field) use ($request) {
+            return $field->authorizedToSee($request);
+        });
+
         $firstTab = $fields->whereInstanceOf(ResourceNavigationTab::class)->first();
 
         $controller = $request->route()->controller;
 
         if (!($controller instanceof ResourceShowController)) {
 
-            $fields->each(function ($field) {
+            $fields->each(static function ($field) {
 
                 if ($field instanceof ResourceNavigationTab) {
 
@@ -181,7 +259,7 @@ trait HasResourceNavigationTabTrait
 
             if ($field instanceof ResourceNavigationTab) {
 
-                if (is_null($activeTab) && $field === $firstTab || $field->isActive($activeTab)) {
+                if (($activeTab === null && $field === $firstTab) || $field->isActive($activeTab)) {
 
                     $fields->put($index, $field->data);
 

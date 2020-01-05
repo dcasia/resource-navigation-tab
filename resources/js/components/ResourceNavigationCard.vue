@@ -6,7 +6,7 @@
                 class="p-6 dim flex-1 text-center no-underline text-primary border-b-2 cursor-pointer border-transparent hover:border-90"
                 v-for="(resource, key) of card.resources"
                 :key="key"
-                :to="{ query: { ...$route.query, tab: resource.slug } }"
+                :to="{ query: { ...$route.query, navigationTab: resource.slug } }"
                 @click.native="onNavigate">
 
             {{ resource.label }}
@@ -29,11 +29,17 @@
         ],
         mounted() {
 
-            if (!this.$route.query.tab) {
+            /**
+             * Nova sort the cards per size, smaller comes first, so to keep this card above everything,
+             * It starts with the smallest possible size, and then change resize itself to the largest
+             */
+            this.$parent.$el.classList.add('w-full')
+
+            if (!this.$route.query.navigationTab) {
 
                 this.$router.push({
                     query: {
-                        ...this.$route.$query, tab: this.card.resources[ 0 ].slug
+                        ...this.$route.$query, navigationTab: this.card.resources[ 0 ].slug
                     }
                 })
 
@@ -55,10 +61,10 @@
             onNavigate() {
 
                 const detail = this.getDetailCard()
-                const activeTab = this.$route.query.tab
+                const activeTab = this.$route.query.navigationTab
                 const activeCards = this.card.cardsToRemove[ activeTab ]
 
-                detail.cards = detail.cards.filter(card => !activeCards.includes(card.component))
+                detail.cards = detail.cards.filter(card => !activeCards.includes(card.navigationTabClass))
 
                 detail.initializeComponent()
                 detail.fetchCards()
@@ -71,6 +77,12 @@
 
 
 <style lang="scss" scoped>
+
+    .card-panel {
+
+        height: auto;
+
+    }
 
     .card {
 

@@ -3,10 +3,17 @@
 namespace DigitalCreative\ResourceNavigationTab;
 
 use Illuminate\Support\Str;
+use Laravel\Nova\AuthorizedToSee;
+use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Panel;
+use Laravel\Nova\ProxiesCanSeeToGate;
 
 class ResourceNavigationTab extends Panel
 {
+
+    use ProxiesCanSeeToGate;
+    use AuthorizedToSee;
+
     /**
      * The field's component.
      *
@@ -42,15 +49,40 @@ class ResourceNavigationTab extends Panel
      */
     public function __construct(string $name, $fields)
     {
+
+        $this->resourceLabel = $name;
         $this->name = $name;
         $this->id = Str::slug($name);
-        $this->data = is_callable($fields) ? call_user_func($fields) : $fields;
+        $this->data = is_callable($fields) ? $fields() : $fields;
+
+        /**
+         * Proxy canSee on all children
+         *
+         * @var Field $field
+         */
+        foreach ($this->data as $field) {
+
+            $field->seeCallback = function (...$arguments) {
+
+                if (is_callable($this->seeCallback)) {
+
+                    return call_user_func($this->seeCallback, ...$arguments);
+
+                }
+
+                return true;
+
+            };
+
+        }
+
     }
 
     /**
      * Create a new element.
      *
      * @param array $arguments
+     *
      * @return static
      */
     public static function make(...$arguments)
@@ -58,16 +90,27 @@ class ResourceNavigationTab extends Panel
         return new static(...$arguments);
     }
 
-    public function behaveAsPanel()
+    /**
+     * @return void
+     */
+    public function behaveAsPanel(): void
     {
         $this->data = $this->prepareFields($this->data);
     }
 
+    /**
+     * @param string|null $activeTab
+     *
+     * @return bool
+     */
     public function isActive(?string $activeTab): bool
     {
-        return Str::slug($this->name) === $activeTab;
+        return $this->id === $activeTab;
     }
 
+    /**
+     * @return $this
+     */
     public function withoutCards(): self
     {
         $this->withCards = false;
@@ -75,6 +118,11 @@ class ResourceNavigationTab extends Panel
         return $this;
     }
 
+    /**
+     * @param string ...$cards
+     *
+     * @return $this
+     */
     public function removeCards(...$cards): self
     {
         $this->cardsToRemove = $cards;
@@ -82,6 +130,11 @@ class ResourceNavigationTab extends Panel
         return $this;
     }
 
+    /**
+     * @param string $label
+     *
+     * @return $this
+     */
     public function resourceTableTitle(string $label): self
     {
         $this->resourceLabel = $label;
@@ -89,6 +142,9 @@ class ResourceNavigationTab extends Panel
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getTableLabel(): string
     {
         return $this->resourceLabel ?? $this->name;
