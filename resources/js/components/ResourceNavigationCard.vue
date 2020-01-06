@@ -37,7 +37,7 @@
 
             if (!this.$route.query.navigationTab) {
 
-                this.$router.push({
+                this.$router.replace({
                     query: {
                         ...this.$route.$query, navigationTab: this.card.resources[ 0 ].slug
                     }
