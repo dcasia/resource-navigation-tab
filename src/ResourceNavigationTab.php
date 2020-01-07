@@ -62,11 +62,28 @@ class ResourceNavigationTab extends Panel
          */
         foreach ($this->data as $field) {
 
-            $field->seeCallback = function (...$arguments) {
+            $originalCallback = $field->seeCallback;
 
-                if (is_callable($this->seeCallback)) {
+            $field->seeCallback = function (...$arguments) use ($originalCallback) {
+
+                $selfIsCallable = is_callable($this->seeCallback);
+                $originalIsCallable = is_callable($originalCallback);
+
+                if ($selfIsCallable && $originalIsCallable) {
+
+                    return call_user_func($this->seeCallback, ...$arguments) && $originalCallback(...$arguments);
+
+                }
+
+                if ($selfIsCallable) {
 
                     return call_user_func($this->seeCallback, ...$arguments);
+
+                }
+
+                if ($originalIsCallable) {
+
+                    return $originalCallback(...$arguments);
 
                 }
 

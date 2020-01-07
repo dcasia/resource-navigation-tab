@@ -5,6 +5,7 @@ namespace DigitalCreative\ResourceNavigationTab;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Card;
+use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\FieldCollection;
 use Laravel\Nova\Http\Controllers\ResourceShowController;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -19,8 +20,8 @@ trait HasResourceNavigationTabTrait
      *
      * @param NovaRequest $request
      *
-     * @throws Throwable
      * @return FieldCollection
+     * @throws Throwable
      */
     public function detailFieldsWithinPanels(NovaRequest $request)
     {
@@ -71,8 +72,8 @@ trait HasResourceNavigationTabTrait
      *
      * @param NovaRequest $request
      *
-     * @throws Throwable
      * @return Collection
+     * @throws Throwable
      */
     public function resolveCards(NovaRequest $request)
     {
@@ -194,8 +195,8 @@ trait HasResourceNavigationTabTrait
     /**
      * @param NovaRequest $request
      *
-     * @throws Throwable
      * @return ResourceNavigationTab
+     * @throws Throwable
      */
     private function getActiveNavigationField(NovaRequest $request): ResourceNavigationTab
     {
@@ -228,8 +229,16 @@ trait HasResourceNavigationTabTrait
     {
 
         $activeTab = $this->getActiveTab($request);
-        $fields = collect($this->fields($request))->filter(static function (ResourceNavigationTab $field) use ($request) {
-            return $field->authorizedToSee($request);
+        $fields = collect($this->fields($request))->filter(static function ($field) use ($request) {
+
+            if (method_exists($field, 'authorizedToSee')) {
+
+                return $field->authorizedToSee($request);
+
+            }
+
+            return true;
+
         });
 
         if (!($request->route()->controller instanceof ResourceShowController)) {
