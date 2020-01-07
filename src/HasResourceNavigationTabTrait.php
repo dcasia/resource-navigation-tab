@@ -5,7 +5,6 @@ namespace DigitalCreative\ResourceNavigationTab;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Card;
-use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\FieldCollection;
 use Laravel\Nova\Http\Controllers\ResourceShowController;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -20,8 +19,8 @@ trait HasResourceNavigationTabTrait
      *
      * @param NovaRequest $request
      *
-     * @return FieldCollection
      * @throws Throwable
+     * @return FieldCollection
      */
     public function detailFieldsWithinPanels(NovaRequest $request)
     {
@@ -72,8 +71,8 @@ trait HasResourceNavigationTabTrait
      *
      * @param NovaRequest $request
      *
-     * @return Collection
      * @throws Throwable
+     * @return Collection
      */
     public function resolveCards(NovaRequest $request)
     {
@@ -195,8 +194,8 @@ trait HasResourceNavigationTabTrait
     /**
      * @param NovaRequest $request
      *
-     * @return ResourceNavigationTab
      * @throws Throwable
+     * @return ResourceNavigationTab
      */
     private function getActiveNavigationField(NovaRequest $request): ResourceNavigationTab
     {
@@ -245,7 +244,7 @@ trait HasResourceNavigationTabTrait
 
             $fields->each(static function ($field) {
 
-                if ($field instanceof ResourceNavigationTab) {
+                if ($field instanceof ResourceNavigationTab && $field->shouldBehaveAsPanel) {
 
                     $field->behaveAsPanel();
 

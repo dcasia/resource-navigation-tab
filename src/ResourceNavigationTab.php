@@ -42,6 +42,11 @@ class ResourceNavigationTab extends Panel
     public $id;
 
     /**
+     * @var bool
+     */
+    public $shouldBehaveAsPanel = true;
+
+    /**
      * Create a new field.
      *
      * @param string $name
@@ -108,8 +113,17 @@ class ResourceNavigationTab extends Panel
     }
 
     /**
-     * @return void
+     * @param bool $behaveAsPanel
+     *
+     * @return ResourceNavigationTab
      */
+    public function shouldBehaveAsPanel(bool $behaveAsPanel): self
+    {
+        $this->shouldBehaveAsPanel = $behaveAsPanel;
+
+        return $this;
+    }
+
     public function behaveAsPanel(): void
     {
         $this->data = $this->prepareFields($this->data);
