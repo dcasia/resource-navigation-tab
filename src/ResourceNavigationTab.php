@@ -67,6 +67,15 @@ class ResourceNavigationTab extends Panel
          */
         foreach ($this->data as $field) {
 
+            /**
+             * Ignore everything that doesnt have a seeCallback function
+             */
+            if (!method_exists($field, 'seeCallback')) {
+
+                continue;
+
+            }
+
             $originalCallback = $field->seeCallback;
 
             $field->seeCallback = function (...$arguments) use ($originalCallback) {
