@@ -7,7 +7,7 @@ Nova.booting((Vue, router, store) => {
 
         if (from.name === 'detail') {
 
-            return next({ ...from, name: 'detail-navigation-card', replace: true })
+            return next({ ...from, name: 'detail-navigation-card' })
 
         }
 
