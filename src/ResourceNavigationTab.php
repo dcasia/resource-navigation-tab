@@ -47,6 +47,11 @@ class ResourceNavigationTab extends Panel
     public $shouldBehaveAsPanel = true;
 
     /**
+     * @var int|null
+     */
+    public $resourceId = null;
+
+    /**
      * Create a new field.
      *
      * @param string $name
@@ -188,6 +193,18 @@ class ResourceNavigationTab extends Panel
     public function getTableLabel(): string
     {
         return $this->resourceLabel ?? $this->name;
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return $this
+     */
+    public function resourceId(int $id): self
+    {
+        $this->resourceId = $id;
+
+        return $this;
     }
 
 }

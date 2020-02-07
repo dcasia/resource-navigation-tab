@@ -3,11 +3,14 @@
     <card class="flex flex-row items-center justify-center">
 
         <router-link
-                class="p-6 dim flex-1 text-center no-underline text-primary border-b-2 cursor-pointer border-transparent hover:border-90"
-                v-for="(resource, key) of card.resources"
-                :key="key"
-                :to="{ query: { ...$route.query, navigationTab: resource.slug } }"
-                @click.native="onNavigate">
+            class="p-6 dim flex-1 text-center no-underline text-primary border-b-2 cursor-pointer border-transparent hover:border-90"
+            v-for="(resource, key) of card.resources"
+            :key="key"
+            :to="{
+                query: { ...$route.query, navigationTab: resource.slug },
+                params: { ...$route.params, resourceId: resource.resourceId || $route.params.resourceId }
+            }"
+            @click.native="onNavigate">
 
             {{ resource.label }}
 
@@ -39,7 +42,8 @@
 
                 this.$router.replace({
                     query: {
-                        ...this.$route.$query, navigationTab: this.card.resources[ 0 ].slug
+                        ...this.$route.query,
+                        navigationTab: this.card.resources[ 0 ].slug
                     }
                 })
 
