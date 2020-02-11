@@ -32,14 +32,18 @@ class ExampleNovaResource extends Resource {
     public function fields(Request $request)
     {
         return [
-            ResourceNavigationTab::make('Information', [
-                Text::make('Name'),
-                Text::make('Age'),
-                HasMany::make('Hobbies')
+            ResourceNavigationTab::make([
+                'label' => 'Information',
+                'behaveAsPanel' => true / false,
+                'fields' => [
+                    Text::make('Name'),
+                    Text::make('Age'),
+                    HasMany::make('Hobbies')
+                ]
             ])
-            ResourceNavigationTab::make('Activities', [...]),
-            ResourceNavigationTab::make('Social Interactions', [...]),
-            ResourceNavigationTab::make('Settings', [...]),
+            ResourceNavigationTab::make([ 'label' => 'Activities' ]),
+            ResourceNavigationTab::make([ 'label' => 'Social Interactions' ]),
+            ResourceNavigationTab::make([ 'label' => 'Settings' ]),
         ];
     }
 
@@ -57,7 +61,11 @@ however you can customize it by calling `->resourceTableTitle('Another title')`
 public function fields(Request $request)
 {
     return [
-        ResourceNavigationTab::make('Tab Title', [...])->resourceTableTitle('Resource Table Title'),
+        ResourceNavigationTab::make([
+            'title' => 'Tab Title', 
+            'resourceTableTitle' => 'Resource Table Title'
+            'fields' => [...]
+        ]),
     ];
 }
 ```
@@ -68,22 +76,33 @@ however you can choose which card you want to show when a specific tab is select
 ```php
 use DigitalCreative\ResourceNavigationTab\HasResourceNavigationTabTrait;
 use DigitalCreative\ResourceNavigationTab\ResourceNavigationTab;
+use DigitalCreative\ResourceNavigationTab\CardMode;
 
 class ExampleNovaResource extends Resource {
  
     public function fields(Request $request)
     {
         return [
-            ResourceNavigationTab::make('Profile', []), // show all the availiable cards by default
-            ResourceNavigationTab::make('Activities', [...])->removeCards([ ClientProfileCard::class, ... ]), // remove only the specified card from this tab
-            ResourceNavigationTab::make('Preferences', [...])->withoutCards(), // removes all cards when this tab is active
+            ResourceNavigationTab::make([ 'title' => 'Profile' ]), // show all the available cards by default
+            ResourceNavigationTab::make([ 
+                'title' => 'Activities',
+                'cardMode' => CardMode::KEEP_ALL | CardMode::EXCLUDE_ALL // show all or remove all cards when this tab is active
+            ]),
+            ResourceNavigationTab::make([ 
+                'title' => 'Preferences',
+                'cardMode' => CardMode::ONLY | CardMode::EXCEPT // show or remove only the selected cards
+                'cards' => [
+                   ClientPerformanceCard::class,
+                   ClientProfileCard::class,
+                ]
+            ]), 
         ];
     }
 
     public function cards(Request $request)
     {
         return [
-            new ClientPerformaceCard(),
+            new ClientPerformanceCard(),
             new DailySalesCard(),
             new ClientProfileCard()
         ];

@@ -2,9 +2,11 @@
 
 namespace DigitalCreative\ResourceNavigationTab;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Nova\AuthorizedToSee;
 use Laravel\Nova\Fields\Field;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Laravel\Nova\ProxiesCanSeeToGate;
 
@@ -22,48 +24,54 @@ class ResourceNavigationTab extends Panel
     public $component = 'navigation-field';
 
     /**
-     * @var string|null
+     * @var string
      */
-    public $resourceLabel = null;
+    public $slug;
+
+    /**
+     * @var CardMode
+     */
+    public $cardMode;
 
     /**
      * @var array
      */
-    public $cardsToRemove = [];
+    private $default = [
+        'label' => null,
+        'resourceTableTitle' => null,
+        'behaveAsPanel' => true,
+        'resourceId' => null,
+        'cardMode' => CardMode::KEEP_ALL,
+        'cards' => [],
+        'fields' => []
+    ];
 
     /**
-     * @var boolean
+     * @var array
      */
-    public $withCards = true;
+    private $configuration;
 
     /**
-     * @var string
-     */
-    public $id;
-
-    /**
-     * @var bool
-     */
-    public $shouldBehaveAsPanel = true;
-
-    /**
-     * @var int|null
-     */
-    public $resourceId = null;
-
-    /**
-     * Create a new field.
+     * ResourceNavigationTab constructor.
      *
-     * @param string $name
-     * @param array|callable $fields
+     * @param array $configuration
      */
-    public function __construct(string $name, $fields)
+    public function __construct(array $configuration)
     {
 
-        $this->resourceLabel = $name;
-        $this->name = $name;
-        $this->id = Str::slug($name);
-        $this->data = is_callable($fields) ? $fields() : $fields;
+        $this->configuration = array_merge($this->default, $configuration);
+
+        $this->name = $this->getTableLabel(resolve(NovaRequest::class));
+        $this->slug = $this->getResourceSlug();
+        $this->data = $this->getFields();
+        $this->cardMode = new CardMode($this->configuration[ 'cardMode' ]);
+
+        $this->initializePermissions();
+
+    }
+
+    private function initializePermissions(): void
+    {
 
         /**
          * Proxy canSee on all children
@@ -127,84 +135,68 @@ class ResourceNavigationTab extends Panel
     }
 
     /**
-     * @param bool $behaveAsPanel
-     *
-     * @return ResourceNavigationTab
-     */
-    public function shouldBehaveAsPanel(bool $behaveAsPanel): self
-    {
-        $this->shouldBehaveAsPanel = $behaveAsPanel;
-
-        return $this;
-    }
-
-    public function behaveAsPanel(): void
-    {
-        $this->data = $this->prepareFields($this->data);
-    }
-
-    /**
      * @param string|null $activeTab
      *
      * @return bool
      */
     public function isActive(?string $activeTab): bool
     {
-        return $this->id === $activeTab;
+        return $this->getResourceSlug() === $activeTab;
     }
 
     /**
-     * @return $this
-     */
-    public function withoutCards(): self
-    {
-        $this->withCards = false;
-
-        return $this;
-    }
-
-    /**
-     * @param string ...$cards
+     * @param NovaRequest $request
      *
-     * @return $this
-     */
-    public function removeCards(...$cards): self
-    {
-        $this->cardsToRemove = $cards;
-
-        return $this;
-    }
-
-    /**
-     * @param string $label
-     *
-     * @return $this
-     */
-    public function resourceTableTitle(string $label): self
-    {
-        $this->resourceLabel = $label;
-
-        return $this;
-    }
-
-    /**
      * @return string
      */
-    public function getTableLabel(): string
+    public function getTableLabel(NovaRequest $request): string
     {
-        return $this->resourceLabel ?? $this->name;
+        return $this->configuration[ 'label' ];
     }
 
-    /**
-     * @param int $id
-     *
-     * @return $this
-     */
-    public function resourceId(int $id): self
+    public function getTabLabel(NovaRequest $request): string
     {
-        $this->resourceId = $id;
+        return $this->configuration[ 'resourceTableTitle' ] ?? $this->getTableLabel($request);
+    }
 
-        return $this;
+    public function getResourceSlug(): string
+    {
+        return Str::slug($this->name);
+    }
+
+    public function getResourceId(): ?int
+    {
+        return $this->configuration[ 'resourceId' ] ?? null;
+    }
+
+    public function getCards(): Collection
+    {
+        return collect($this->configuration[ 'cards' ]);
+    }
+
+    private function getFields(): array
+    {
+
+        $fields = $this->configuration[ 'fields' ];
+
+        if (is_callable($fields)) {
+
+            return $fields(resolve(NovaRequest::class));
+
+        }
+
+        return $fields;
+
+    }
+
+    public function behaveAsPanel(): void
+    {
+        $this->data = $this->prepareFields($this->getFields());
+    }
+
+    public function shouldBehaveAsPanel(): bool
+    {
+        return $this->configuration[ 'behaveAsPanel' ];
     }
 
 }

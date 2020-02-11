@@ -28,11 +28,20 @@
              * Get the resource information.
              */
             getResource() {
+
                 this.resource = null
+
+                let query = ''
+
+                if (this.activeTab) {
+
+                    query = '?navigationTab=' + this.activeTab
+
+                }
 
                 return Minimum(
                     Nova.request().get(
-                        '/nova-api/' + this.resourceName + '/' + this.resourceId + '?navigationTab=' + this.activeTab
+                        '/nova-api/' + this.resourceName + '/' + this.resourceId + query
                     )
                 )
                     .then(({ data: { panels, resource } }) => {

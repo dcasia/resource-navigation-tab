@@ -27,7 +27,7 @@ trait HasResourceNavigationTabTrait
         $activeNavigationField = $this->getActiveNavigationField($request);
 
         return $this->assignToPanels(
-            $activeNavigationField->getTableLabel(), $this->detailFields($request)
+            $activeNavigationField->getTabLabel($request), $this->detailFields($request)
         );
     }
 
@@ -97,7 +97,7 @@ trait HasResourceNavigationTabTrait
         /**
          * Replace the name of the active panel with the same label as the tab
          */
-        collect($panels)->firstWhere('name', $label)->name = $navigationField->getTableLabel();
+        collect($panels)->firstWhere('name', $label)->name = $navigationField->getTabLabel($request);
 
         return $panels;
 
@@ -125,25 +125,52 @@ trait HasResourceNavigationTabTrait
             })
             ->each(static function (ResourceNavigationTab $field) use ($cardsToRemove, $cards) {
 
-                /**
-                 * Avoids the cards flashing when switching tabs
-                 */
-                if ($field->withCards) {
+                $slug = $field->getResourceSlug();
 
-                    $cardsToRemove->put(
-                        $field->id,
-                        collect($field->cardsToRemove)->map(static function ($card) use ($cards) {
-                            return $cards->whereInstanceOf($card)->map(static function ($card) {
-                                return get_class($card);
-                            });
-                        })->flatten()
-                    );
+                if ($field->cardMode->is(CardMode::EXCLUDE_ALL)) {
 
-                } else {
-
-                    $cardsToRemove->put($field->id, $cards->map(static function ($card) {
+                    /**
+                     * Mark all cards to be excluded
+                     */
+                    $cardsToRemove->put($slug, $cards->map(static function (Card $card) {
                         return get_class($card);
                     }));
+
+                }
+
+                if ($field->cardMode->is(CardMode::KEEP_ALL)) {
+
+                    $cardsToRemove->put($slug, []);
+
+                }
+
+                if ($field->cardMode->is(CardMode::ONLY)) {
+
+                    $keepCards = $field->getCards();
+
+                    $cardsToRemove->put(
+                        $slug,
+                        $cards->filter(static function (Card $card) use ($keepCards) {
+                            return !$keepCards->contains(get_class($card));
+                        })->map(static function (Card $card) {
+                            return get_class($card);
+                        })->flatten(),
+                    );
+
+                }
+
+                if ($field->cardMode->is(CardMode::EXCEPT)) {
+
+                    $cardsToRemove->put(
+                        $slug,
+                        $field->getCards()
+                              ->map(static function (string $card) use ($cards) {
+                                  return $cards->whereInstanceOf($card)->map(static function (Card $card) {
+                                      return get_class($card);
+                                  });
+                              })
+                              ->flatten()
+                    );
 
                 }
 
@@ -192,15 +219,33 @@ trait HasResourceNavigationTabTrait
     private function getCardsToRemove(Request $request, ResourceNavigationTab $resourceNavigationTab): array
     {
 
-        if (!blank($resourceNavigationTab->cardsToRemove)) {
+        if ($resourceNavigationTab->cardMode->is(CardMode::EXCLUDE_ALL)) {
 
-            return $resourceNavigationTab->cardsToRemove;
+            return $this->cards($request);
 
         }
 
-        if (!$resourceNavigationTab->withCards) {
+        if ($resourceNavigationTab->cardMode->is(CardMode::KEEP_ALL)) {
 
-            return $this->cards($request);
+            return [];
+
+        }
+
+        $cards = $resourceNavigationTab->getCards();
+
+        if ($resourceNavigationTab->cardMode->is(CardMode::EXCEPT)) {
+
+            return $cards->toArray();
+
+        }
+
+        if ($resourceNavigationTab->cardMode->is(CardMode::ONLY)) {
+
+            return collect($this->cards($request))->filter(static function (Card $card) use ($cards) {
+
+                return !$cards->contains(get_class($card));
+
+            })->toArray();
 
         }
 
@@ -246,7 +291,7 @@ trait HasResourceNavigationTabTrait
 
         throw_if($navigationFields->isEmpty(), 'You should include at least 1 NavigationField in your fields array');
 
-        if ($navigationField = $navigationFields->firstWhere('id', $activeTab)) {
+        if ($navigationField = $navigationFields->firstWhere('slug', $activeTab)) {
 
             return $navigationField;
 
@@ -281,7 +326,7 @@ trait HasResourceNavigationTabTrait
 
             $fields->each(static function ($field) {
 
-                if ($field instanceof ResourceNavigationTab && $field->shouldBehaveAsPanel) {
+                if ($field instanceof ResourceNavigationTab && $field->shouldBehaveAsPanel()) {
 
                     $field->behaveAsPanel();
 

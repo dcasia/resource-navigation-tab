@@ -3,14 +3,14 @@
     <card class="flex flex-row items-center justify-center">
 
         <router-link
-            class="p-6 dim flex-1 text-center no-underline text-primary border-b-2 cursor-pointer border-transparent hover:border-90"
-            v-for="(resource, key) of card.resources"
-            :key="key"
-            :to="{
-                query: { ...$route.query, navigationTab: resource.slug },
-                params: { ...$route.params, resourceId: resource.resourceId || $route.params.resourceId }
-            }"
-            @click.native="onNavigate">
+                class="p-6 dim flex-1 text-center no-underline text-primary border-b-2 cursor-pointer border-transparent hover:border-90"
+                v-for="(resource, key) of card.resources"
+                :key="key"
+                :to="{
+                    query: { ...$route.query, navigationTab: resource.slug },
+                    params: { ...$route.params, resourceId: resource.resourceId || $route.params.resourceId }
+                }"
+                @click.native="onNavigate">
 
             {{ resource.label }}
 
@@ -40,14 +40,42 @@
 
             if (!this.$route.query.navigationTab) {
 
-                this.$router.replace({
-                    query: {
-                        ...this.$route.query,
-                        navigationTab: this.card.resources[ 0 ].slug
-                    }
-                })
+                const slug = this.card.resources[ 0 ].slug
+
+                if (slug) {
+
+                    this.$router.replace({
+                        query: {
+                            ...this.$route.query, navigationTab: slug
+                        }
+                    })
+
+                }
 
             }
+
+        },
+        beforeCreate() {
+
+            const interceptor = Nova.request().interceptors.request.use(
+                config => {
+
+                    if (/^\/nova-api\/\S.+\/\d+\/metrics\/\S.+$/.test(config.url)) {
+
+                        if (config.method === 'get' && this.$route.query.navigationTab) {
+
+                            config.params[ 'navigationTab' ] = this.$route.query.navigationTab
+
+                        }
+
+                    }
+
+                    return config
+
+                }
+            )
+
+            this.$on('hook:destroyed', () => Nova.request().interceptors.request.eject(interceptor))
 
         },
         methods: {

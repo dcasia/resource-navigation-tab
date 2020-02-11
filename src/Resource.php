@@ -28,8 +28,8 @@ class Resource implements JsonSerializable
     {
         return [
             'label' => $this->field->name,
-            'slug' => $this->field->id,
-            'resourceId' => $this->field->resourceId
+            'slug' => $this->field->getResourceSlug(),
+            'resourceId' => $this->field->getResourceId()
         ];
     }
 }
