@@ -61,7 +61,7 @@ class ResourceNavigationTab extends Panel
 
         $this->configuration = array_merge($this->default, $configuration);
 
-        $this->name = $this->getTableLabel(resolve(NovaRequest::class));
+        $this->name = $this->getTableLabel(app(NovaRequest::class));
         $this->slug = $this->getResourceSlug();
         $this->data = $this->getFields();
         $this->cardMode = new CardMode($this->configuration[ 'cardMode' ]);
