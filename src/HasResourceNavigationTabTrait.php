@@ -154,7 +154,7 @@ trait HasResourceNavigationTabTrait
                             return !$keepCards->contains(get_class($card));
                         })->map(static function (Card $card) {
                             return get_class($card);
-                        })->flatten(),
+                        })->flatten()
                     );
 
                 }
