@@ -149,7 +149,7 @@ class ResourceNavigationTab extends Panel
      *
      * @return string
      */
-    public function getTableLabel(NovaRequest $request): string
+    public function getTableLabel(NovaRequest $request): ?string
     {
         return $this->configuration[ 'label' ];
     }
