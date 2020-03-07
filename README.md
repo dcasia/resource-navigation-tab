@@ -62,7 +62,7 @@ public function fields(Request $request)
 {
     return [
         ResourceNavigationTab::make([
-            'title' => 'Tab Title', 
+            'label' => 'Tab Title', 
             'resourceTableTitle' => 'Resource Table Title'
             'fields' => [...]
         ]),
@@ -83,13 +83,13 @@ class ExampleNovaResource extends Resource {
     public function fields(Request $request)
     {
         return [
-            ResourceNavigationTab::make([ 'title' => 'Profile' ]), // show all the available cards by default
+            ResourceNavigationTab::make([ 'label' => 'Profile' ]), // show all the available cards by default
             ResourceNavigationTab::make([ 
-                'title' => 'Activities',
+                'label' => 'Activities',
                 'cardMode' => CardMode::KEEP_ALL | CardMode::EXCLUDE_ALL // show all or remove all cards when this tab is active
             ]),
             ResourceNavigationTab::make([ 
-                'title' => 'Preferences',
+                'label' => 'Preferences',
                 'cardMode' => CardMode::ONLY | CardMode::EXCEPT // show or remove only the selected cards
                 'cards' => [
                    ClientPerformanceCard::class,
