@@ -40,7 +40,7 @@ class ExampleNovaResource extends Resource {
                     Text::make('Age'),
                     HasMany::make('Hobbies')
                 ]
-            ])
+            ]),
             ResourceNavigationTab::make([ 'label' => 'Activities' ]),
             ResourceNavigationTab::make([ 'label' => 'Social Interactions' ]),
             ResourceNavigationTab::make([ 'label' => 'Settings' ]),
