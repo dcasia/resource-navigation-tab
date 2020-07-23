@@ -31,61 +31,6 @@ trait HasResourceNavigationTabTrait
         );
     }
 
-    /**
-     * @param $label
-     * @param NovaRequest $request
-     *
-     * @return mixed
-     */
-    protected function panelsWithDefaultLabel($label, NovaRequest $request)
-    {
-        return with(
-            collect(array_values($this->flattenPanels($this->resolveActiveFields($request))))->whereInstanceOf(Panel::class)->values(),
-            static function ($panels) use ($label) {
-                return $panels->when($panels->where('name', $label)->isEmpty(), static function ($panels) use ($label) {
-                    return $panels->prepend((new Panel($label))->withToolbar());
-                })->all();
-            }
-        );
-    }
-
-    /**
-     * Move every sub panel outside of main resource tabs list
-     *
-     * @param array $fields
-     *
-     * @return array
-     */
-    private function flattenPanels(array $fields): array
-    {
-
-        foreach ($fields as $resourceNavigationTab) {
-
-            if (!$resourceNavigationTab instanceof ResourceNavigationTab) {
-
-                continue;
-
-            }
-
-            foreach ($resourceNavigationTab->data as $index => $field) {
-
-                if ($field instanceof Panel) {
-
-                    $fields[] = $field;
-                    unset($resourceNavigationTab->data[ $index ]);
-
-                }
-
-            }
-
-            $resourceNavigationTab->data = array_values($resourceNavigationTab->data);
-
-        }
-
-        return $fields;
-
-    }
-
     public function availablePanelsForDetail($request)
     {
 
@@ -190,7 +135,7 @@ trait HasResourceNavigationTabTrait
 
         $navigationCard = new ResourceNavigationCard($resources);
         $navigationCard->withMeta([
-            'cardsToRemove' => $cardsToRemove
+            'cardsToRemove' => $cardsToRemove,
         ]);
 
         /**
@@ -207,6 +152,71 @@ trait HasResourceNavigationTabTrait
             }
 
         });
+
+    }
+
+    /**
+     * @param NovaRequest $request
+     *
+     * @return FieldCollection
+     */
+    public function availableFields(NovaRequest $request)
+    {
+        return new FieldCollection(array_values($this->filter($this->resolveActiveFields($request))));
+    }
+
+    /**
+     * @param $label
+     * @param NovaRequest $request
+     *
+     * @return mixed
+     */
+    protected function panelsWithDefaultLabel($label, NovaRequest $request)
+    {
+        return with(
+            collect(array_values($this->flattenPanels($this->resolveActiveFields($request))))->whereInstanceOf(Panel::class)->values(),
+            static function ($panels) use ($label) {
+                return $panels->when($panels->where('name', $label)->isEmpty(), static function ($panels) use ($label) {
+                    return $panels->prepend((new Panel($label))->withToolbar());
+                })->all();
+            }
+        );
+    }
+
+    /**
+     * Move every sub panel outside of main resource tabs list
+     *
+     * @param array $fields
+     *
+     * @return array
+     */
+    private function flattenPanels(array $fields): array
+    {
+
+        foreach ($fields as $resourceNavigationTab) {
+
+            if (!$resourceNavigationTab instanceof ResourceNavigationTab) {
+
+                continue;
+
+            }
+
+            foreach ($resourceNavigationTab->data as $index => $field) {
+
+                if ($field instanceof Panel) {
+
+                    $fields[] = $field;
+                    unset($resourceNavigationTab->data[ $index ]);
+
+                }
+
+            }
+
+            $resourceNavigationTab->data = array_values($resourceNavigationTab->data);
+
+        }
+
+        return $fields;
 
     }
 
@@ -256,21 +266,11 @@ trait HasResourceNavigationTabTrait
     /**
      * @param NovaRequest $request
      *
-     * @return FieldCollection
-     */
-    public function availableFields(NovaRequest $request)
-    {
-        return new FieldCollection(array_values($this->filter($this->resolveActiveFields($request))));
-    }
-
-    /**
-     * @param NovaRequest $request
-     *
      * @return string|null
      */
     private function getActiveTab(NovaRequest $request): ?string
     {
-        return $request->query('navigationTab');
+        return $_COOKIE[ 'navigation_tab' ] ?? null;
     }
 
     /**

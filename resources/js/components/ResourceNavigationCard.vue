@@ -5,6 +5,7 @@
         <router-link
                 class="p-6 dim flex-1 text-center no-underline text-primary border-b-2 cursor-pointer border-transparent hover:border-90"
                 v-for="(resource, key) of card.resources"
+                replace
                 :key="key"
                 :to="{
                     query: { ...$route.query, navigationTab: resource.slug },
@@ -21,6 +22,17 @@
 </template>
 
 <script>
+
+    function setCookie(name, value, expiration) {
+        const date = new Date()
+        date.setTime(date.getTime() + (expiration * 24 * 60 * 60 * 1000))
+        const expires = 'expires=' + date.toUTCString()
+        document.cookie = name + '=' + value + ';' + expires + ';path=/'
+    }
+
+    function deleteCookie(name) {
+        document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+    }
 
     export default {
         name: 'NavigationCard',
@@ -57,25 +69,7 @@
         },
         beforeCreate() {
 
-            const interceptor = Nova.request().interceptors.request.use(
-                config => {
-
-                    if (/^\/nova-api\/\S.+\/\d+\/metrics\/\S.+$/.test(config.url)) {
-
-                        if (config.method === 'get' && this.$route.query.navigationTab) {
-
-                            config.params[ 'navigationTab' ] = this.$route.query.navigationTab
-
-                        }
-
-                    }
-
-                    return config
-
-                }
-            )
-
-            this.$on('hook:destroyed', () => Nova.request().interceptors.request.eject(interceptor))
+            this.$on('hook:destroyed', () => deleteCookie('navigation_tab'))
 
         },
         methods: {
@@ -91,6 +85,8 @@
 
             },
             onNavigate() {
+
+                setCookie('navigation_tab', this.$route.query.navigationTab)
 
                 const detail = this.getDetailCard()
                 const activeTab = this.$route.query.navigationTab
