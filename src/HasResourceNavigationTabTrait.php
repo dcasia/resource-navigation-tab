@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Laravel\Nova\Card;
 use Laravel\Nova\Fields\FieldCollection;
 use Laravel\Nova\Http\Controllers\ResourceShowController;
+use Laravel\Nova\Http\Requests\CardRequest;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Throwable;
@@ -60,14 +61,12 @@ trait HasResourceNavigationTabTrait
     {
 
         $activeNavigationField = $this->getActiveNavigationField($request);
+        $navigationResources = $this->resolveNavigationResources($request);
+
         $cards = collect($this->cards($request));
         $cardsToRemove = collect();
 
-        $resources = collect($this->fields($request))
-            ->whereInstanceOf(ResourceNavigationTab::class)
-            ->filter(static function (ResourceNavigationTab $field) use ($request) {
-                return $field->authorizedToSee($request);
-            })
+        $resources = $navigationResources
             ->each(static function (ResourceNavigationTab $field) use ($cardsToRemove, $cards) {
 
                 $slug = $field->getResourceSlug();
@@ -183,6 +182,42 @@ trait HasResourceNavigationTabTrait
         );
     }
 
+    private function resolveNavigationResources(NovaRequest $request): Collection
+    {
+        return once(function () use ($request) {
+
+            if ($request instanceof CardRequest) {
+
+                /**
+                 * As this card is only meant to be used on the details page,
+                 * if the fieldForDetail exist attempt to fetch the fields from it
+                 */
+                if (method_exists($this, 'fieldsForDetail')) {
+
+                    $allFields = $this->fieldsForDetail($request);
+
+                } else {
+
+                    $allFields = $this->fields($request);
+
+                }
+
+            } else {
+
+                $method = $this->fieldsMethod($request);
+                $allFields = $this->{$method}($request);
+
+            }
+
+            return collect($allFields)
+                ->whereInstanceOf(ResourceNavigationTab::class)
+                ->filter(function (ResourceNavigationTab $field) use ($request) {
+                    return $field->authorizedToSee($request);
+                });
+
+        });
+    }
+
     /**
      * Move every sub panel outside of main resource tabs list
      *
@@ -282,12 +317,8 @@ trait HasResourceNavigationTabTrait
     private function getActiveNavigationField(NovaRequest $request): ResourceNavigationTab
     {
 
-        $fields = collect($this->fields($request));
         $activeTab = $this->getActiveTab($request);
-        $navigationFields = $fields->whereInstanceOf(ResourceNavigationTab::class)
-                                   ->filter(static function (ResourceNavigationTab $field) use ($request) {
-                                       return $field->authorizedToSee($request);
-                                   });
+        $navigationFields = $this->resolveNavigationResources($request);
 
         throw_if($navigationFields->isEmpty(), 'You should include at least 1 NavigationField in your fields array');
 
@@ -310,7 +341,11 @@ trait HasResourceNavigationTabTrait
     {
 
         $activeTab = $this->getActiveTab($request);
-        $fields = collect($this->fields($request))->filter(static function ($field) use ($request) {
+
+        $method = $this->fieldsMethod($request);
+        $allFields = $this->{$method}($request);
+
+        $fields = collect($allFields)->filter(static function ($field) use ($request) {
 
             if (method_exists($field, 'authorizedToSee')) {
 
