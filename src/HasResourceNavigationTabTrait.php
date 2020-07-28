@@ -8,6 +8,7 @@ use Laravel\Nova\Card;
 use Laravel\Nova\Fields\FieldCollection;
 use Laravel\Nova\Http\Controllers\ResourceShowController;
 use Laravel\Nova\Http\Requests\CardRequest;
+use Laravel\Nova\Http\Requests\MetricRequest;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Throwable;
@@ -186,7 +187,7 @@ trait HasResourceNavigationTabTrait
     {
         return once(function () use ($request) {
 
-            if ($request instanceof CardRequest) {
+            if ($request instanceof CardRequest || $request instanceof MetricRequest) {
 
                 /**
                  * As this card is only meant to be used on the details page,
