@@ -11,6 +11,7 @@ use Laravel\Nova\Http\Requests\CardRequest;
 use Laravel\Nova\Http\Requests\MetricRequest;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
+use Laravel\Nova\Resource as NovaResource;
 use Throwable;
 
 trait HasResourceNavigationTabTrait
@@ -20,11 +21,12 @@ trait HasResourceNavigationTabTrait
      * Resolve the detail fields and assign them to their associated panel.
      *
      * @param NovaRequest $request
+     * @param NovaResource $resource
      *
      * @throws Throwable
      * @return FieldCollection
      */
-    public function detailFieldsWithinPanels(NovaRequest $request)
+    public function detailFieldsWithinPanels(NovaRequest $request, NovaResource $resource)
     {
         $activeNavigationField = $this->getActiveNavigationField($request);
 
@@ -33,10 +35,10 @@ trait HasResourceNavigationTabTrait
         );
     }
 
-    public function availablePanelsForDetail($request)
+    public function availablePanelsForDetail($request, NovaResource $resource)
     {
 
-        $label = Panel::defaultNameForDetail($request->newResource());
+        $label = Panel::defaultNameForDetail($resource ?? $request->newResource());
         $panels = $this->panelsWithDefaultLabel($label, $request);
 
         $navigationField = $this->getActiveNavigationField($request);
