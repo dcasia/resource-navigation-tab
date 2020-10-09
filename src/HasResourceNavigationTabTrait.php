@@ -35,10 +35,10 @@ trait HasResourceNavigationTabTrait
         );
     }
 
-    public function availablePanelsForDetail($request, NovaResource $resource)
+    public function availablePanelsForDetail(NovaRequest $request, NovaResource $resource)
     {
 
-        $label = Panel::defaultNameForDetail($resource ?? $request->newResource());
+        $label = Panel::defaultNameForDetail($resource);
         $panels = $this->panelsWithDefaultLabel($label, $request);
 
         $navigationField = $this->getActiveNavigationField($request);
