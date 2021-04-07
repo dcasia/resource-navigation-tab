@@ -34,6 +34,24 @@
         document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
     }
 
+    function getCookie(cname, defaultValue) {
+        const name = cname + "=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const ca = decodedCookie.split(';');
+
+        for (let i = 0; i <ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+
+        return defaultValue;
+    }
+
     export default {
         name: 'NavigationCard',
         props: [
@@ -46,24 +64,35 @@
 
             /**
              * Nova sort the cards per size, smaller comes first, so to keep this card above everything,
-             * It starts with the smallest possible size, and then change resize itself to the largest
+             * It starts with the smallest possible size, and then resize itself to the largest
              */
             this.$parent.$el.classList.add('w-full')
 
+            const slug = this.card.resources[0].slug
+            const activeTab = getCookie('navigation_tab', '');
+
             if (!this.$route.query.navigationTab) {
-
-                const slug = this.card.resources[ 0 ].slug
-
                 if (slug) {
-
                     this.$router.replace({
                         query: {
                             ...this.$route.query, navigationTab: slug
                         }
                     })
-
                 }
+            }
+            /**
+             * If we have a tab active on page load - please load the correct content
+             */
+            else if (this.$route.query.navigationTab && this.$route.query.navigationTab !== slug) {
+               if (activeTab !== '' && activeTab !== this.$route.query.navigationTab) {
+                   this.$router.replace({
+                       query: {
+                          ...this.$route.query, navigationTab: activeTab
+                       }
+                   })
+               }
 
+               this.onNavigate();
             }
 
         },
@@ -74,18 +103,14 @@
         },
         methods: {
             getDetailCard(element = this) {
-
                 if (element.hasOwnProperty('initializeComponent')) {
-
                     return element
-
                 }
 
                 return this.getDetailCard(element.$parent)
 
             },
             onNavigate() {
-
                 setCookie('navigation_tab', this.$route.query.navigationTab)
 
                 const detail = this.getDetailCard()
@@ -96,7 +121,6 @@
 
                 detail.initializeComponent()
                 detail.fetchCards()
-
             }
         }
     }
