@@ -64,7 +64,7 @@
 
             /**
              * Nova sort the cards per size, smaller comes first, so to keep this card above everything,
-             * It starts with the smallest possible size, and then change resize itself to the largest
+             * It starts with the smallest possible size, and then resize itself to the largest
              */
             this.$parent.$el.classList.add('w-full')
 
