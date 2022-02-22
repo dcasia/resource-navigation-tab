@@ -1,6 +1,6 @@
 <template>
 
-    <card class="resource-navigation-card whitespace-no-wrap flex flex-row items-center justify-center">
+    <card class="resource-navigation-card whitespace-no-wrap flex flex-row flex-wrap md:flex-nowrap items-center justify-center">
 
         <router-link
                 class="p-6 dim flex-1 text-center no-underline text-primary border-b-2 cursor-pointer border-transparent hover:border-90"

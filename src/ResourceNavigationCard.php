@@ -11,7 +11,7 @@ class ResourceNavigationCard extends Card
      *
      * @var string
      */
-    public $width = '1/2';
+    public $width = 'full';
 
     /**
      * NavigationCard constructor.
