@@ -6,8 +6,10 @@
 
 Organize your resource fields into tabs.
 
-![Resource Navigation Tab in Action](./screenshots/dark/demo-2.png#gh-dark-mode-only)
-![Resource Navigation Tab in Action](./screenshots/light/demo-2.png#gh-light-mode-only)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./screenshots/dark/demo-2.png">
+  <img alt="Resource Navigation Tab in Action" src="./screenshots/light/demo-2.png">
+</picture>
 
 # Installation
 
@@ -50,8 +52,10 @@ class ExampleNovaResource extends Resource {
 
 Once setup navigate to your resource detail view, and you should be presented with this card:
 
-![Resource Navigation Tab in Action](./screenshots/dark/demo-1.png#gh-dark-mode-only)
-![Resource Navigation Tab in Action](./screenshots/light/demo-1.png#gh-light-mode-only)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./screenshots/dark/demo-1.png">
+  <img alt="Resource Navigation Tab in Action" src="./screenshots/light/demo-1.png">
+</picture>
 
 Every defined card will be shown on every tab by default, however you can choose which card you want to show when a
 specific tab is selected:
