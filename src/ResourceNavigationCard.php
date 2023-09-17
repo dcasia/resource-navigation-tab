@@ -1,41 +1,55 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace DigitalCreative\ResourceNavigationTab;
 
+use Illuminate\Support\Collection;
 use Laravel\Nova\Card;
 
 class ResourceNavigationCard extends Card
 {
-    /**
-     * The width of the card (1/3, 1/2, or full).
-     *
-     * @var string
-     */
-    public $width = '1/2';
+    public $width = 'full';
+    public $onlyOnDetail = true;
 
-    /**
-     * NavigationCard constructor.
-     *
-     * @param $resources
-     */
-    public function __construct($resources)
+    public function __construct(
+        private readonly Collection $resources,
+    )
     {
-
-        $this->withMeta([
-            'resources' => $resources
-        ]);
-
-        $this->onlyOnDetail();
-
     }
 
-    /**
-     * Get the component name for the element.
-     *
-     * @return string
-     */
-    public function component()
+    public function component(): string
     {
         return 'resource-navigation-card';
+    }
+
+    private function resolveResources(): array
+    {
+        $resources = $this->resources
+            ->filter(fn (ResourceNavigationField $resource) => $resource->authorizedFields()->isNotEmpty())
+            ->map(fn (ResourceNavigationField $resource) => [
+                'name' => $resource->name,
+                'isActive' => $resource->isActive(),
+                'slug' => $resource->getSlug(),
+            ])
+            ->values()
+            ->toArray();
+
+        /**
+         * If no resource is active, activate the first one
+         */
+        if (blank(array_filter($resources, fn (array $resource) => $resource[ 'isActive' ]))) {
+            $resources[ 0 ][ 'isActive' ] = true;
+        }
+
+        return $resources;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return array_merge([
+            'resources' => $this->resolveResources(),
+            'cookieName' => ResourceNavigationTabServiceProvider::$COOKIE_NAME,
+        ], parent::jsonSerialize());
     }
 }
