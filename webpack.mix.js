@@ -5,7 +5,7 @@ require('mix-tailwindcss');
 
 mix.setPublicPath('dist')
     .js('resources/js/card.js', 'js')
-    .vue({version: 3})
+    .vue({ version: 3 })
     .postCss('resources/css/card.css', 'css')
     .tailwind()
     .nova('digital-creative/resource-navigation-tab')
