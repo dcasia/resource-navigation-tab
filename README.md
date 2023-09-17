@@ -4,7 +4,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/digital-creative/resource-navigation-tab)](https://packagist.org/packages/digital-creative/resource-navigation-tab)
 [![License](https://img.shields.io/packagist/l/digital-creative/resource-navigation-tab)](https://github.com/dcasia/resource-navigation-tab/blob/master/LICENSE)
 
-Organize your long pile of tables and relationships into structured pages.
+Organize your resource fields into tabs.
 
 ![Resource Navigation Tab in Action](./screenshots/dark/demo-2.png#gh-dark-mode-only)
 ![Resource Navigation Tab in Action](./screenshots/light/demo-2.png#gh-light-mode-only)
@@ -30,7 +30,7 @@ class ExampleNovaResource extends Resource {
  
     use HasResourceNavigationTabTrait;
 
-    public function fields(Request $request)
+    public function fields(NovaRequest $request): array
     {
         return [
             ResourceNavigationField::make('Information')
@@ -65,7 +65,7 @@ class ExampleNovaResource extends Resource {
 
     use HasResourceNavigationTabTrait;
  
-    public function fields(Request $request)
+    public function fields(NovaRequest $request): array
     {
         return [
             ResourceNavigationField::make('Information'), // show all the available cards by default
@@ -74,7 +74,7 @@ class ExampleNovaResource extends Resource {
         ];
     }
 
-    public function cards(Request $request)
+    public function cards(NovaRequest $request): array
     {
         return [
             new ClientPerformanceCard(),
@@ -88,6 +88,4 @@ class ExampleNovaResource extends Resource {
 
 ## License
 
-The MIT License (MIT). Please
-see [License File](https://raw.githubusercontent.com/dcasia/resource-navigation-tab/master/LICENSE) for more
-information.
+The MIT License (MIT). Please see [License File](./LICENSE) for more information.

@@ -1,6 +1,6 @@
 {
     "name": "digital-creative/resource-navigation-tab",
-    "description": "Organize your long pile of tables and relationships into structured pages.",
+    "description": "Organize your resource fields into tabs.",
     "keywords": [
         "laravel",
         "nova",
