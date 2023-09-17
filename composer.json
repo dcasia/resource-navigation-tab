@@ -1,6 +1,6 @@
 {
     "name": "digital-creative/resource-navigation-tab",
-    "description": "Organize your long pile of tables and relationships into structured pages.",
+    "description": "Organize your resource fields into tabs.",
     "keywords": [
         "laravel",
         "nova",
@@ -15,8 +15,8 @@
     ],
     "license": "MIT",
     "require": {
-        "php": ">=7.1.0",
-        "laravel/nova": "^3.12.0"
+        "php": ">=8.1",
+        "laravel/nova": "^4"
     },
     "autoload": {
         "psr-4": {

@@ -1,7 +1,5 @@
 import ResourceNavigationCard from './components/ResourceNavigationCard'
 
-Nova.booting((Vue, router, store) => {
-
-    Vue.component('resource-navigation-card', ResourceNavigationCard)
-
+Nova.booting((app, store) => {
+    app.component('resource-navigation-card', ResourceNavigationCard)
 })
