@@ -70,7 +70,7 @@ class ExampleNovaResource extends Resource {
         return [
             ResourceNavigationField::make('Information'), // show all the available cards by default
             ResourceNavigationField::make('Activities')->withCards([ DailySalesCard::class, ClientProfileCard::class ]), // only show these cards when this tab is active
-            ResourceNavigationField::make('Activities')->withoutCards([ ... ]), // hide all cards when this tab is active
+            ResourceNavigationField::make('Settings')->withoutCards([ ... ]), // hide all cards when this tab is active
         ];
     }
 
