@@ -13,7 +13,6 @@ use Laravel\Nova\Panel;
 class ResourceNavigationField extends Panel
 {
     public ?array $cards = null;
-    public $name;
 
     private static ?string $active = null;
 
