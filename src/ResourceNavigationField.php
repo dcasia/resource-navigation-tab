@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace DigitalCreative\ResourceNavigationTab;
 
@@ -30,7 +30,7 @@ class ResourceNavigationField extends Panel
 
     public function authorizedFields(): Collection
     {
-        return collect($this->data)->filter(fn(Field $field) => $field->authorize($this->request()));
+        return collect($this->data)->filter(fn (Field $field) => $field->authorize($this->request()));
     }
 
     public function getSlug(): string
