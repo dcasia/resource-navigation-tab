@@ -19,10 +19,6 @@ class ResourceNavigationField extends Panel
     public function __construct(string $name, array $fields = [])
     {
         $this->name = $name;
-
-        if (filled($fields)) {
-            $this->fields($fields);
-        }
     }
 
     public function fields(array|callable $fields): static
@@ -39,19 +35,14 @@ class ResourceNavigationField extends Panel
 
     public function getSlug(): string
     {
-        return Str::of($this->request()->resource())
-            ->replace('\\', '-')
-            ->append('-')
-            ->append($this->name)
-            ->slug()
-            ->toString();
+        return Str::slug($this->name);
     }
 
     public function isActive(): bool
     {
-        $activeSlug = $this->request()->cookie(ResourceNavigationTabServiceProvider::$COOKIE_NAME);
+        $activeSlug = $this->request()->input(ResourceNavigationTabServiceProvider::$COOKIE_NAME);
 
-        if (is_null($activeSlug) && is_null(static::$active)) {
+        if (is_null($activeSlug) && is_null(static::$active) && $this->authorizedFields()->isNotEmpty()) {
             $activeSlug = static::$active = $this->getSlug();
         }
 
@@ -85,14 +76,16 @@ class ResourceNavigationField extends Panel
             return parent::prepareFields($fields);
         }
 
+        $this->data = parent::prepareFields($fields);
+
         /**
          * If the tab is not active, we pretend there are no fields in it
          */
         if ($this->isActive() === false) {
-            return [];
+            return $this->data = [];
         }
 
-        return parent::prepareFields($fields);
+        return $this->data;
     }
 
     private function request(): NovaRequest

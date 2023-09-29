@@ -1,10 +1,10 @@
 <template>
 
-    <Card class="resource-navigation-card whitespace-nowrap pt-2 overflow-x-auto flex flex-row items-center md:justify-center">
+    <Card class="resource-navigation-card whitespace-nowrap overflow-x-auto flex flex-row items-center md:justify-center">
 
         <div @click="onNavigate(resource.slug)"
              v-for="(resource, key) of card.resources"
-             class="p-6 flex-1 text-center cursor-pointer leading-tight text-sm transition"
+             class="p-4 pt-6 flex-1 text-center cursor-pointer leading-tight text-sm transition"
              :class="[
                  { 'border-b-2 hover:border-[rgba(var(--colors-primary-500))] first:rounded-l-lg last:rounded-r-lg': true },
                  { 'border-[rgba(var(--colors-primary-500))] font-bold': resource.isActive === true },
@@ -19,25 +19,76 @@
 
 </template>
 
-<script setup>
+<script>
 
-    const props = defineProps([ 'card' ])
-    const activeTab = Object.values(props.card.resources).find(resource => resource.isActive)
+    const novaRequest = Nova.request
 
-    if (activeTab) {
-        setCookie(props.card.cookieName, activeTab.slug)
+    const interceptors = []
+    const interceptorsInstance = []
+
+    Nova.request = (...params) => {
+
+        for (const param of params) {
+
+            for (const interceptor of interceptors) {
+                interceptor(param)
+            }
+
+        }
+
+        const axiosInstance = novaRequest(...params)
+
+        if (axiosInstance instanceof Promise) {
+            return axiosInstance
+        }
+
+        for (const interceptor of interceptors) {
+
+            interceptorsInstance.push({
+                instance: axiosInstance,
+                interceptor: axiosInstance.interceptors.request.use(config => interceptor(config)),
+            })
+
+        }
+
+        return axiosInstance
+
     }
 
-    function onNavigate(slug) {
-        setCookie(props.card.cookieName, slug)
-        Nova.visit(window.location.pathname)
-    }
+    interceptors.push(config => {
 
-    function setCookie(name, value, expiration) {
-        const date = new Date()
-        date.setTime(date.getTime() + (expiration * 24 * 60 * 60 * 1000))
-        const expires = 'expires=' + date.toUTCString()
-        document.cookie = name + '=' + value + ';' + expires + ';path=/'
+        if (config.params === undefined) {
+            config.params = {}
+        }
+
+        const searchParams = new URLSearchParams(window.location.search)
+
+        if (searchParams.has('x-tab')) {
+            config.params[ 'x-resource-navigation-tab' ] = searchParams.get('x-tab')
+        }
+
+        return config
+
+    })
+
+    export default {
+        props: [ 'card' ],
+        setup() {
+            return {
+                onNavigate: slug => {
+
+                    const searchParams = new URLSearchParams(window.location.search)
+
+                    Nova.visit(window.location.pathname, {
+                        data: {
+                            ...Object.fromEntries(searchParams.entries()),
+                            'x-tab': slug,
+                        }
+                    })
+
+                }
+            }
+        }
     }
 
 </script>
