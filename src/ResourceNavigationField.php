@@ -14,7 +14,7 @@ class ResourceNavigationField extends Panel
 {
     public ?array $cards = null;
 
-    public static ?string $active = null;
+    private static ?string $active = null;
 
     public function __construct(string $name, array $fields = [])
     {
