@@ -7,8 +7,8 @@
 Organize your resource fields into tabs.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/dcasia/custom-relationship-field/main/screenshots/dark/demo-2.png">
-  <img alt="Resource Navigation Tab in Action" src="https://raw.githubusercontent.com/dcasia/custom-relationship-field/main/screenshots/light/demo-2.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/dcasia/resource-navigation-tab/main/screenshots/dark/demo-2.png">
+  <img alt="Resource Navigation Tab in Action" src="https://raw.githubusercontent.com/dcasia/resource-navigation-tab/main/screenshots/light/demo-2.png">
 </picture>
 
 # Installation
@@ -53,8 +53,8 @@ class ExampleNovaResource extends Resource {
 Once setup navigate to your resource detail view, and you should be presented with this card:
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/dcasia/custom-relationship-field/main/screenshots/dark/demo-1.png">
-  <img alt="Resource Navigation Tab in Action" src="https://raw.githubusercontent.com/dcasia/custom-relationship-field/main/screenshots/light/demo-1.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/dcasia/resource-navigation-tab/main/screenshots/dark/demo-1.png">
+  <img alt="Resource Navigation Tab in Action" src="https://raw.githubusercontent.com/dcasia/resource-navigation-tab/main/screenshots/light/demo-1.png">
 </picture>
 
 Every defined card will be shown on every tab by default, however you can choose which card you want to show when a
