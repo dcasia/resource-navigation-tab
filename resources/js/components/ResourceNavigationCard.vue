@@ -21,50 +21,26 @@
 
 <script>
 
-    const novaRequest = Nova.request
-
-    const interceptors = []
-    const interceptorsInstance = []
-
-    Nova.request = (...params) => {
-
-        for (const param of params) {
-
-            for (const interceptor of interceptors) {
-                interceptor(param)
-            }
-
-        }
-
-        const axiosInstance = novaRequest(...params)
-
-        if (axiosInstance instanceof Promise) {
-            return axiosInstance
-        }
-
-        for (const interceptor of interceptors) {
-
-            interceptorsInstance.push({
-                instance: axiosInstance,
-                interceptor: axiosInstance.interceptors.request.use(config => interceptor(config)),
-            })
-
-        }
-
-        return axiosInstance
-
-    }
+    import { interceptors } from './RequestHighjacker'
 
     interceptors.push(config => {
 
-        if (config.params === undefined) {
-            config.params = {}
-        }
+        try {
 
-        const searchParams = new URLSearchParams(window.location.search)
+            if (config.params === undefined || config.params === null) {
+                config.params = {}
+            }
 
-        if (searchParams.has('x-tab')) {
-            config.params[ 'x-resource-navigation-tab' ] = searchParams.get('x-tab')
+            const searchParams = new URLSearchParams(window.location.search)
+
+            if (searchParams.has('x-tab')) {
+                config.params[ 'x-resource-navigation-tab' ] = searchParams.get('x-tab')
+            }
+
+        } catch (error) {
+
+            console.log('ResourceNavigationCard.vue error:', error)
+
         }
 
         return config
@@ -78,17 +54,18 @@
                 onNavigate: slug => {
 
                     const searchParams = new URLSearchParams(window.location.search)
+                    const url = window.location.pathname.replace(new RegExp(`^${ Nova.config('base') }`), '')
 
-                    Nova.visit(window.location.pathname, {
+                    Nova.visit(url, {
                         data: {
                             ...Object.fromEntries(searchParams.entries()),
                             'x-tab': slug,
-                        }
+                        },
                     })
 
-                }
+                },
             }
-        }
+        },
     }
 
 </script>
