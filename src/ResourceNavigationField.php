@@ -40,7 +40,7 @@ class ResourceNavigationField extends Panel
 
     public function isActive(): bool
     {
-        $activeSlug = $this->request()->input(ResourceNavigationTabServiceProvider::$COOKIE_NAME);
+        $activeSlug = $this->request()->input('x-resource-navigation-tab');
 
         if (is_null($activeSlug) && is_null(static::$active) && $this->authorizedFields()->isNotEmpty()) {
             $activeSlug = static::$active = $this->getSlug();

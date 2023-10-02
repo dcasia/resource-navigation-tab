@@ -47,9 +47,6 @@ class ResourceNavigationCard extends Card
 
     public function jsonSerialize(): array
     {
-        return array_merge([
-            'resources' => $this->resolveResources(),
-            'cookieName' => ResourceNavigationTabServiceProvider::$COOKIE_NAME,
-        ], parent::jsonSerialize());
+        return array_merge([ 'resources' => $this->resolveResources() ], parent::jsonSerialize());
     }
 }
