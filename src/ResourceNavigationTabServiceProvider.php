@@ -12,11 +12,15 @@ class ResourceNavigationTabServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        Nova::serving(static function (ServingNova $event): void {
+        Nova::serving(function (ServingNova $event): void {
 
             Nova::script('resource-navigation-tab', __DIR__ . '/../dist/js/card.js');
             Nova::style('resource-navigation-tab', __DIR__ . '/../dist/css/card.css');
 
+        });
+
+        $this->app->terminating(function () {
+            ResourceNavigationField::$active = null;
         });
     }
 }

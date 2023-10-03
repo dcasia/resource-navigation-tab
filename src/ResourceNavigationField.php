@@ -14,9 +14,9 @@ class ResourceNavigationField extends Panel
 {
     public ?array $cards = null;
 
-    private static ?string $active = null;
+    public static ?string $active = null;
 
-    public function __construct(string $name, array $fields = [])
+    public function __construct(string $name)
     {
         $this->name = $name;
     }
