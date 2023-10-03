@@ -19,7 +19,7 @@ class ResourceNavigationTabServiceProvider extends ServiceProvider
 
         });
 
-        $this->app->terminating(function () {
+        $this->app->terminating(function (): void {
             ResourceNavigationField::$active = null;
         });
     }
