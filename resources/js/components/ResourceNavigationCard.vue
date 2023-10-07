@@ -1,6 +1,6 @@
 <template>
 
-    <Card class="resource-navigation-card whitespace-nowrap overflow-x-auto flex flex-row items-center md:justify-center">
+    <Card class="resource-navigation-card overflow-x-hidden whitespace-nowrap overflow-x-auto flex flex-row items-center md:justify-center">
 
         <div @click="onNavigate(resource.slug)"
              v-for="(resource, key) of card.resources"
