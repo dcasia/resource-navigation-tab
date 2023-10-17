@@ -49,19 +49,24 @@
 
     export default {
         props: [ 'card' ],
-        setup() {
+        setup(props) {
             return {
                 onNavigate: slug => {
 
                     const searchParams = new URLSearchParams(window.location.search)
                     const url = window.location.pathname.replace(new RegExp(`^${ Nova.config('base') }`), '')
+                    const activeTab = props.card.resources.find(({ isActive }) => isActive)
 
-                    Nova.visit(url, {
-                        data: {
-                            ...Object.fromEntries(searchParams.entries()),
-                            'x-tab': slug,
-                        },
-                    })
+                    if (activeTab.slug !== slug) {
+
+                        Nova.visit(url, {
+                            data: {
+                                ...Object.fromEntries(searchParams.entries()),
+                                'x-tab': slug,
+                            },
+                        })
+
+                    }
 
                 },
             }
