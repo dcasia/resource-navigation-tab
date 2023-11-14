@@ -46,6 +46,10 @@ class ResourceNavigationField extends Panel
             $activeSlug = static::$active = $this->getSlug();
         }
 
+        if (is_null($activeSlug) && !is_null(static::$active)) {
+            $activeSlug = static::$active;
+        }
+
         if ($activeSlug === $this->getSlug()) {
             return true;
         }

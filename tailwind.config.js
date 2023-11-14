@@ -1,5 +1,4 @@
 module.exports = {
-    mode: 'jit',
-    content: [ './resources/**/*.vue' ],
-    important: '.resource-navigation-card'
+    ...require('../../vendor/laravel/nova/tailwind.config'),
+    important: '.resource-navigation-card',
 }
